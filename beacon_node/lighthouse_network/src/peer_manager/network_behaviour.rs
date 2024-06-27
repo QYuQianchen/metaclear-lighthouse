@@ -246,7 +246,14 @@ impl<E: EthSpec> PeerManager<E> {
         // Update the prometheus metrics
         if self.metrics_enabled {
             metrics::inc_counter(&metrics::PEER_CONNECT_EVENT_COUNT);
-
+            // metrics on peer_id to multiaddress pairs
+            metrics::inc_gauge_vec(
+                &metrics::PEER_TO_MULTIADDR,
+                &[
+                    &peer_id.to_string(),
+                    &endpoint.get_remote_address().to_string(),
+                ],
+            );
             self.update_peer_count_metrics();
         }
 
@@ -317,7 +324,13 @@ impl<E: EthSpec> PeerManager<E> {
         if self.metrics_enabled {
             // Legacy standard metrics.
             metrics::inc_counter(&metrics::PEER_DISCONNECT_EVENT_COUNT);
-
+            // metrics on peer_id to multiaddress pairs
+            metrics::dec_gauge_vec(&metrics::PEER_TO_MULTIADDR,
+                &[
+                    &peer_id.to_string(),
+                    &_endpoint.get_remote_address().to_string(),
+                ],
+            );
             self.update_peer_count_metrics();
         }
     }

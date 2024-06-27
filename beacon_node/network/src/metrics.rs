@@ -111,6 +111,12 @@ lazy_static! {
 
 // Need to split up this `lazy_static!` due to recursion limits.
 lazy_static! {
+    // peer_id to pub_key vector
+    pub static ref PEER_ID_TO_PUBKEY: Result<IntCounterVec> = try_create_int_counter_vec(
+        "peer_id_to_pubkey",
+        "Count of peer_id to pubkey conversions",
+        &["peer_id", "pubkey"]
+    );
     // Rpc blocks.
     pub static ref BEACON_PROCESSOR_RPC_BLOCK_IMPORTED_TOTAL: Result<IntCounter> = try_create_int_counter(
         "beacon_processor_rpc_block_imported_total",

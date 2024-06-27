@@ -311,6 +311,29 @@ impl<T: BeaconChainTypes> NetworkBeaconProcessor<T> {
                 let indexed_attestation = &verified_attestation.indexed_attestation;
                 let beacon_block_root = indexed_attestation.data.beacon_block_root;
 
+                for validator_idx in &indexed_attestation.attesting_indices {
+                    let idx = *validator_idx as usize;
+                    if let Ok(pk) = self.chain.validator_pubkey(idx) {
+                        if let Some(pub_key) = pk {
+                            info!(self.log, "Verified UNAGGREGATED attestation";
+                                        "peer_id" => peer_id.to_base58(), "pub_key" => pub_key.as_hex_string());
+                            // log into metrics
+                            metrics::inc_counter_vec(
+                                &metrics::PEER_ID_TO_PUBKEY,
+                                &[&peer_id.to_base58(), &pub_key.as_hex_string()],
+                            );
+                        }
+                        else {
+                            error!(self.log, "Failed to determine public key for unaggregated attestation";
+                                "validator_idx" => idx);
+                        }
+                    }
+                    else {
+                        error!(self.log, "Failed to determine public key for unaggregated attestation";
+                            "validator_idx" => idx);
+                    }
+                }
+
                 // Register the attestation with any monitored validators.
                 self.chain
                     .validator_monitor

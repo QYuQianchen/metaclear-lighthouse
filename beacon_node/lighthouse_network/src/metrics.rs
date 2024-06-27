@@ -1,6 +1,12 @@
 pub use lighthouse_metrics::*;
 
 lazy_static! {
+    pub static ref PEER_TO_MULTIADDR: Result<IntGaugeVec> = try_create_int_gauge_vec(
+        "libp2p_peer_to_multiaddr",
+        "Count of peer to multiaddr conversions",
+        &["peer_id", "multiaddress"]
+    );
+
     pub static ref NAT_OPEN: Result<IntGaugeVec> = try_create_int_gauge_vec(
         "nat_open",
         "An estimate indicating if the local node is reachable from external nodes",
