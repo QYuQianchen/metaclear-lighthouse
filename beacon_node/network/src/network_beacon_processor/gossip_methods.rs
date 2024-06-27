@@ -540,6 +540,29 @@ impl<T: BeaconChainTypes> NetworkBeaconProcessor<T> {
                 let aggregate = &verified_aggregate.signed_aggregate;
                 let indexed_attestation = &verified_aggregate.indexed_attestation;
 
+                for validator_idx in &indexed_attestation.attesting_indices {
+                    let idx = *validator_idx as usize;
+                    if let Ok(pk) = self.chain.validator_pubkey(idx) {
+                        if let Some(pub_key) = pk {
+                            info!(self.log, "Verified AGGREGATED attestation";
+                                        "peer_id" => peer_id.to_base58(), "pub_key" => pub_key.as_hex_string());
+                            // log into metrics
+                            metrics::inc_counter_vec(
+                                &metrics::PEER_ID_TO_PUBKEY,
+                                &[&peer_id.to_base58(), &pub_key.as_hex_string()],
+                            );
+                        }
+                        else {
+                            error!(self.log, "Failed to determine public key for aggregated attestation";
+                                "validator_idx" => idx);
+                        }
+                    }
+                    else {
+                        error!(self.log, "Failed to determine public key for aggregated attestation";
+                            "validator_idx" => idx);
+                    }
+                }
+
                 // If the attestation is still timely, propagate it.
                 self.propagate_attestation_if_timely(
                     verified_aggregate.attestation(),
