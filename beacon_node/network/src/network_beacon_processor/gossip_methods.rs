@@ -308,6 +308,7 @@ impl<T: BeaconChainTypes> NetworkBeaconProcessor<T> {
     ) {
         match result {
             Ok(verified_attestation) => {
+                debug!(self.log, "process_gossip_attestation_result, ok");
                 let indexed_attestation = &verified_attestation.indexed_attestation;
                 let beacon_block_root = indexed_attestation.data.beacon_block_root;
 
@@ -403,6 +404,7 @@ impl<T: BeaconChainTypes> NetworkBeaconProcessor<T> {
                 );
             }
             Err(RejectedUnaggregate { attestation, error }) => {
+                debug!(self.log, "process_gossip_attestation_result, err");
                 self.handle_attestation_verification_failure(
                     peer_id,
                     message_id,
@@ -537,6 +539,7 @@ impl<T: BeaconChainTypes> NetworkBeaconProcessor<T> {
     ) {
         match result {
             Ok(verified_aggregate) => {
+                debug!(self.log, "process_gossip_aggregate_result, ok");
                 let aggregate = &verified_aggregate.signed_aggregate;
                 let indexed_attestation = &verified_aggregate.indexed_attestation;
 
@@ -629,6 +632,7 @@ impl<T: BeaconChainTypes> NetworkBeaconProcessor<T> {
                 signed_aggregate,
                 error,
             }) => {
+
                 // Report the failure to gossipsub
                 self.handle_attestation_verification_failure(
                     peer_id,
